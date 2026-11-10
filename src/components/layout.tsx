@@ -10,6 +10,7 @@ import {
   ListChecks,
   ChartNoAxesCombined,
   FileChartColumn,
+  BookOpen,
   History,
   Building2,
   Settings,
@@ -44,6 +45,7 @@ const nav = [
     icon: ChartNoAxesCombined,
   },
   { label: "Laporan Mutu", path: "/mutu", icon: FileChartColumn },
+  { label: "Katalog Indikator Mutu", path: "/indikator-mutu", icon: BookOpen },
   { label: "Riwayat Aktivitas", path: "/aktivitas", icon: History },
 ];
 export function Layout() {

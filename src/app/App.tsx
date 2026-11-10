@@ -15,6 +15,7 @@ const IncidentForm = lazy(() => import("../pages/IncidentForm"));
 const Detail = lazy(() => import("../pages/Detail"));
 const Workbench = lazy(() => import("../pages/Workbench"));
 const Analytics = lazy(() => import("../pages/Analytics"));
+const QualityCatalog = lazy(() => import("../pages/QualityCatalog"));
 const Quality = lazy(() => import("../pages/Quality"));
 const Settings = lazy(() =>
   import("../pages/Settings").then((m) => ({ default: m.Settings })),
@@ -65,6 +66,8 @@ export default function App() {
               <Route path="tindak-lanjut" element={<Workbench mode="capa" />} />
               <Route path="analisis" element={<Analytics />} />
               <Route path="mutu" element={<Quality />} />
+              <Route path="indikator-mutu" element={<QualityCatalog />} />
+              <Route path="indikator-mutu/:id" element={<QualityCatalog />} />
               <Route path="aktivitas" element={<ActivityPage />} />
               <Route path="unit" element={<Units />} />
               <Route path="pengaturan" element={<Settings />} />

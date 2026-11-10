@@ -49,6 +49,16 @@ Tidak membutuhkan `.env`, secret, API, database, atau layanan eksternal. Font In
 - Cetak A4, identitas RSAS, watermark DEMO, 14 butir, pengesahan, dan grading. Penomoran halaman memakai CSS paged media di browser yang mendukung (Chromium modern). Aktifkan header/footer browser bila diperlukan pada browser lain.
 - Master unit contoh dapat ditambah, diubah, dihapus. Rename memperbarui referensi; unit yang masih dipakai tidak dapat dihapus.
 
+## Katalog referensi indikator mutu
+
+Halaman `/indikator-mutu` menyajikan **34 indikator dari dokumen yang dilampirkan**: 10 prioritas rumah sakit dan 24 prioritas unit. Katalog menyediakan pencarian, filter lingkup/unit/catatan sumber, pagination, profil rinci, ekspor referensi JSON, serta cetak dengan label **BUKAN LAPORAN CAPAIAN**.
+
+Target tertulis dan definisi pengukuran disertai nomor halaman sumber. Tidak ada data capaian, numerator/denominator observasi, atau penetapan target aktif yang dikarang. Katalog bersifat baca saja dan terpisah dari data insiden/demo localStorage maupun master unit demo.
+
+Perbedaan sumber dipertahankan, termasuk target IMP-RS-06 (≥95% / 100%), orientasi staf SDM (95% / 100%), variasi nama HLIU/HILU, dan profil Humas yang belum tersedia. Ambang waktu yang tidak disebutkan dokumen tidak direka. Lihat [pemetaan sumber indikator](docs/quality-indicator-sources.md).
+
+PDF asli dan identitas/nomor personal penandatangan tidak disalin ke repository. Definisi dipakai sebagai referensi, bukan instruksi yang dieksekusi oleh aplikasi atau bukti persetujuan SOP terkini. Grading risiko insiden tetap manual karena lampiran tidak menetapkan matriks grading.
+
 ## Struktur
 
 ```text
@@ -105,4 +115,4 @@ Untuk penggunaan operasional diperlukan backend aman, autentikasi dan RBAC di se
 
 ![Dashboard RSAS-SAFETY — data sintetis](docs/screenshots/dashboard.png)
 
-[Pratinjau formulir mobile](docs/screenshots/mobile-form.png)
+[Pratinjau formulir mobile](docs/screenshots/mobile-form.png) · [Katalog indikator mutu](docs/screenshots/quality-catalog.png)
