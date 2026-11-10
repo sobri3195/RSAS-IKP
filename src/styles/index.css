@@ -164,7 +164,7 @@ em {
   color: #b5c7d8;
   margin-top: 6px;
 }
-.logo-placeholder {
+.brand-logo {
   position: relative;
   flex-shrink: 0;
   width: 36px;
@@ -181,7 +181,7 @@ em {
   letter-spacing: 0.7px;
   color: #acbecf;
 }
-.logo-placeholder img {
+.brand-logo img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -191,7 +191,7 @@ em {
   background: #112c47;
   border-radius: 5px;
 }
-.logo-placeholder.large {
+.brand-logo.large {
   width: 49px;
   height: 55px;
 }
@@ -1415,7 +1415,7 @@ footer .footer-version {
 .collapsed .brand {
   padding: 0 3px;
 }
-.collapsed .brand > div:not(.logo-placeholder),
+.collapsed .brand > div:not(.brand-logo),
 .collapsed .institution,
 .collapsed .nav-caption,
 .collapsed .nav-item span,
@@ -2919,7 +2919,7 @@ dialog::backdrop {
   .brand {
     padding: 0 3px;
   }
-  .brand > div:not(.logo-placeholder),
+  .brand > div:not(.brand-logo),
   .institution,
   .nav-caption,
   .nav-item span,
@@ -3011,7 +3011,7 @@ dialog::backdrop {
   .sidebar.mobile-open nav {
     margin-top: 0;
   }
-  .sidebar.mobile-open .brand > .logo-placeholder {
+  .sidebar.mobile-open .brand > .brand-logo {
     display: flex;
   }
   .sidebar-backdrop {
@@ -4457,4 +4457,45 @@ dialog::backdrop {
   .reference-print {
     page: quality-reference;
   }
+}
+
+@media print {
+  .print-logo {
+    border: 0;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .print-logo img {
+    display: block;
+    width: 19mm;
+    height: 19mm;
+    object-fit: contain;
+  }
+}
+
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.brand-logo img {
+  background: transparent;
+  border-radius: 50%;
+  display: block;
+}
+.brand-logo.large {
+  width: 56px;
+  height: 56px;
+}
+.print-logo img,
+.print-rsas-logo {
+  object-fit: contain;
+}
+.print-rsas-logo {
+  width: 19mm;
+  height: 19mm;
+  float: left;
+  margin-right: 5mm;
 }
