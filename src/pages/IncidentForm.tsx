@@ -24,6 +24,8 @@ import {
   emptyForm,
   formSchema,
   stepFields,
+  patientImpacts,
+  nonPatientImpact,
   type FormData,
   type Incident,
 } from "../schemas/models";
@@ -118,6 +120,15 @@ export default function IncidentForm() {
     const timer = setTimeout(() => persist("DRAFT", true), 1400);
     return () => clearTimeout(timer);
   }, [serialized]);
+  useEffect(() => {
+    const impact = getValues("impact");
+    if (
+      (values.target === "Pasien" && impact === nonPatientImpact) ||
+      (values.target !== "Pasien" && impact && impact !== nonPatientImpact)
+    ) {
+      setValue("impact", "");
+    }
+  }, [values.target, getValues, setValue]);
   if (id && !existing)
     return (
       <Empty title="Draft tidak ditemukan">
@@ -479,13 +490,16 @@ export default function IncidentForm() {
                     <legend>
                       11. Akibat insiden terhadap pasien <em>*</em>
                     </legend>
-                    {[
-                      "Kematian",
-                      "Cedera irreversible / berat",
-                      "Cedera reversible / sedang",
-                      "Cedera ringan",
-                      "Tidak ada cedera",
-                    ].map((o) => (
+                    {values.target !== "Pasien" && (
+                      <p className="info-note">
+                        Kejadian ini menyangkut non-pasien. Tidak menetapkan
+                        dampak cedera pasien; ikuti mekanisme K3 sesuai SOP.
+                      </p>
+                    )}
+                    {(values.target === "Pasien"
+                      ? patientImpacts
+                      : [nonPatientImpact]
+                    ).map((o) => (
                       <label className="radio-option" key={o}>
                         <input type="radio" value={o} {...register("impact")} />
                         <span>{o}</span>

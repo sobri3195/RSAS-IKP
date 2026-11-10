@@ -15,7 +15,15 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { subMonths, format } from "date-fns";
+import {
+  subMonths,
+  format,
+  parseISO,
+  isValid,
+  differenceInCalendarDays,
+  eachDayOfInterval,
+  eachMonthOfInterval,
+} from "date-fns";
 import { id } from "date-fns/locale";
 import type { Incident } from "../schemas/models";
 import { aggregate, colors, gradeLabel, deadline } from "../utils/domain";
@@ -29,27 +37,61 @@ export const palette = [
   "#8a9fb8",
   "#4d6d93",
 ];
-export function TrendChart({ items }: { items: Incident[] }) {
-  const months = Array.from({ length: 6 }, (_, n) =>
-    subMonths(new Date(), 5 - n),
-  );
-  const data = months.map((d) => ({
-    name: format(d, "MMM", { locale: id }),
+export interface TrendRange {
+  start: string;
+  end: string;
+}
+export function buildTrendData(
+  items: Incident[],
+  range?: TrendRange,
+  anchor = new Date(),
+) {
+  let daily = false;
+  let bins: Date[];
+  if (range) {
+    const start = parseISO(range.start),
+      end = parseISO(range.end);
+    if (!isValid(start) || !isValid(end) || start > end) return [];
+    daily = differenceInCalendarDays(end, start) <= 31;
+    bins = daily
+      ? eachDayOfInterval({ start, end })
+      : eachMonthOfInterval({ start, end });
+  } else {
+    bins = Array.from({ length: 6 }, (_, n) => subMonths(anchor, 5 - n));
+  }
+  const periodFormat = daily ? "yyyy-MM-dd" : "yyyy-MM";
+  const data = bins.map((d) => ({
+    period: format(d, periodFormat),
+    name: format(d, daily ? "d MMM" : range ? "MMM yyyy" : "MMM", {
+      locale: id,
+    }),
     KPC: 0,
     KNC: 0,
     KTC: 0,
     KTD: 0,
-    ...Object.fromEntries(
-      ["KPC", "KNC", "KTC", "KTD"].map((kind) => [
-        kind,
-        items.filter(
-          (i) =>
-            i.incident.incidentDate.slice(0, 7) === format(d, "yyyy-MM") &&
-            i.incident.kind === kind,
-        ).length,
-      ]),
-    ),
   }));
+  const byPeriod = new Map(data.map((row) => [row.period, row]));
+  for (const incident of items) {
+    const date = incident.incident.incidentDate;
+    if (range && (date < range.start || date > range.end)) continue;
+    const row = byPeriod.get(date.slice(0, daily ? 10 : 7));
+    const kind = incident.incident.kind;
+    if (
+      row &&
+      (kind === "KPC" || kind === "KNC" || kind === "KTC" || kind === "KTD")
+    )
+      row[kind]++;
+  }
+  return data;
+}
+export function TrendChart({
+  items,
+  range,
+}: {
+  items: Incident[];
+  range?: TrendRange;
+}) {
+  const data = buildTrendData(items, range);
   return items.length ? (
     <ResponsiveContainer width="100%" height={235}>
       <AreaChart
@@ -104,7 +146,7 @@ export function TrendChart({ items }: { items: Incident[] }) {
             stroke={palette[n]}
             strokeWidth={2.3}
             fill={`url(#gradient-${n})`}
-            dot={false}
+            dot={data.length === 1 ? { r: 4 } : false}
             activeDot={{ r: 5 }}
           />
         ))}

@@ -3961,3 +3961,500 @@ dialog::backdrop {
     visibility: visible;
   }
 }
+
+/* Source-grounded quality reference catalogue; no achievement data. */
+.reference-hero {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding: 29px 32px;
+  background: linear-gradient(115deg, #eaf3f7, #f5f9fb);
+  border: 1px solid #dce9ef;
+  border-radius: 10px;
+  margin-bottom: 22px;
+}
+.reference-book {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 73px;
+  height: 83px;
+  background: #fff;
+  border: 1px solid #d8e7ee;
+  border-radius: 10px;
+  color: #588b9e;
+  box-shadow: 0 5px 20px #1c4b6410;
+}
+.reference-hero > div:nth-child(2) {
+  max-width: 640px;
+}
+.reference-hero > div > span {
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #7c9aaa;
+}
+.reference-hero h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #315a72;
+  line-height: 1.45;
+  margin: 9px 0 10px;
+}
+.reference-hero p {
+  font-size: 11px;
+  color: #7c97a8;
+  max-width: 580px;
+}
+.reference-tag {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #d5e5ed;
+  background: #fff;
+  border-radius: 6px;
+  padding: 9px 12px;
+  white-space: nowrap;
+  color: #7b98aa;
+  font-size: 9px;
+}
+.reference-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.reference-stats > .card {
+  padding: 20px 22px;
+}
+.reference-stats span {
+  display: block;
+  font-size: 10px;
+  color: #8ba0af;
+}
+.reference-stats strong {
+  display: block;
+  font-size: 29px;
+  font-weight: 600;
+  color: #527a91;
+  margin-top: 12px;
+}
+.reference-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 15px 18px;
+  background: #fff8ec;
+  color: #aa8c58;
+  border: 1px solid #f1e6d2;
+  border-radius: 8px;
+  font-size: 10px;
+  margin-bottom: 23px;
+}
+.reference-disclaimer > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.reference-list {
+  margin-bottom: 23px;
+}
+.reference-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 19px 21px;
+}
+.reference-toolbar > .input-icon {
+  flex: 1;
+  max-width: none;
+}
+.reference-toolbar > select {
+  font-size: 10px;
+  width: 190px;
+}
+.reference-subtoolbar {
+  padding: 0 21px 17px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #94a7b5;
+  font-size: 9px;
+  border-bottom: 1px solid #e6edf2;
+}
+.reference-subtoolbar > .checkbox-field {
+  margin: 0;
+  font-size: 10px;
+}
+.reference-subtoolbar > span {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.reference-code {
+  display: block;
+  font-size: 8px;
+  color: #94aabc;
+  margin-bottom: 7px;
+}
+.reference-list .table-title {
+  font-size: 11px;
+  max-width: 360px;
+}
+.reference-list td {
+  padding: 19px 21px;
+  vertical-align: top;
+}
+.reference-scope {
+  display: block;
+  font-size: 8px;
+  color: #9aafbd;
+  margin-bottom: 6px;
+}
+.reference-unit {
+  font-size: 10px;
+  font-weight: 500;
+  color: #678699;
+}
+.reference-target-summary {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  max-width: 230px;
+  font-size: 10px;
+  line-height: 1.8;
+  color: #5f8b9c;
+}
+.reference-target-summary > span {
+  background: #f0f7f9;
+  padding: 3px 7px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.reference-review {
+  background: #fff7e7;
+  color: #b29253;
+}
+.reference-available {
+  background: #edf6f4;
+  color: #739e90;
+}
+.reference-source-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 23px;
+  padding: 20px 23px 27px;
+}
+.reference-source-grid > div {
+  padding: 19px;
+  border: 1px solid #e3edf2;
+  background: #f8fbfc;
+  border-radius: 8px;
+  min-width: 0;
+}
+.reference-source-grid svg {
+  color: #7ca1b3;
+  margin-bottom: 13px;
+}
+.reference-source-grid h3 {
+  font-size: 11px;
+  color: #6a8b9e;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+.reference-source-grid span {
+  display: block;
+  font-size: 9px;
+  color: #9eb0bd;
+  margin-top: 12px;
+}
+.reference-detail > .card {
+  margin-bottom: 22px;
+}
+.reference-card-content {
+  padding: 15px 23px 25px;
+}
+.reference-targets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.reference-targets > div {
+  padding: 20px;
+  background: #f2f8fa;
+  border: 1px solid #e2edf2;
+  border-radius: 7px;
+}
+.reference-targets strong {
+  font-size: 20px;
+  font-weight: 600;
+  display: block;
+  color: #54889a;
+  overflow-wrap: anywhere;
+}
+.reference-targets small {
+  font-size: 9px;
+  line-height: 1.8;
+  display: block;
+  color: #91a8b8;
+  margin-top: 12px;
+}
+.reference-issues {
+  padding: 20px 23px;
+  background: #fff8ed;
+  border: 1px solid #f0e2c9;
+  border-radius: 8px;
+  color: #ab8c57;
+  margin-bottom: 22px;
+}
+.reference-issues > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.reference-issues h2 {
+  font-size: 13px;
+  font-weight: 600;
+}
+.reference-issues ul {
+  padding-left: 19px;
+  margin-bottom: 0;
+  line-height: 1.95;
+  font-size: 11px;
+}
+.reference-profile {
+  margin: 0;
+  padding: 7px 23px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 30px;
+}
+.reference-profile > div {
+  padding: 20px 0;
+  border-bottom: 1px solid #eaf1f5;
+  min-width: 0;
+}
+.reference-profile > div:nth-child(-n + 4) {
+  grid-column: 1/-1;
+}
+.reference-profile dt {
+  font-size: 10px;
+  font-weight: 600;
+  color: #65889b;
+  margin-bottom: 10px;
+}
+.reference-profile dd {
+  margin: 0;
+  white-space: pre-line;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #7c97a8;
+  overflow-wrap: anywhere;
+}
+.reference-missing {
+  font-size: 10px;
+  color: #a6b5c0;
+  font-style: italic;
+}
+.reference-citations {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+}
+.reference-citations > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 0;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #7e9bad;
+  border-bottom: 1px solid #edf3f6;
+}
+.reference-citations svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.reference-detail .card-heading {
+  padding-bottom: 12px;
+}
+@media (max-width: 1100px) {
+  .reference-hero {
+    padding: 25px;
+  }
+  .reference-tag {
+    display: none;
+  }
+  .reference-toolbar {
+    flex-wrap: wrap;
+  }
+  .reference-toolbar > .input-icon {
+    min-width: 100%;
+  }
+  .reference-toolbar > select {
+    flex: 1;
+  }
+  .reference-list .table-scroll table {
+    min-width: 760px;
+  }
+}
+@media (max-width: 760px) {
+  .reference-hero {
+    padding: 22px;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  .reference-book {
+    width: 43px;
+    height: 53px;
+    border-radius: 7px;
+  }
+  .reference-book svg {
+    width: 25px;
+  }
+  .reference-hero h2 {
+    font-size: 19px;
+  }
+  .reference-hero > div > span {
+    font-size: 6px;
+    line-height: 1.7;
+  }
+  .reference-hero p {
+    font-size: 10px;
+  }
+  .reference-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 11px;
+  }
+  .reference-stats > .card {
+    padding: 16px;
+  }
+  .reference-stats span {
+    font-size: 9px;
+  }
+  .reference-stats strong {
+    font-size: 26px;
+    margin-top: 9px;
+  }
+  .reference-disclaimer {
+    padding: 14px;
+    font-size: 9px;
+  }
+  .reference-toolbar {
+    padding: 16px;
+    gap: 10px;
+  }
+  .reference-toolbar > select {
+    min-width: 0;
+    width: 45%;
+    font-size: 10px;
+  }
+  .reference-subtoolbar {
+    padding: 0 16px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .reference-subtoolbar > .checkbox-field {
+    font-size: 9px;
+  }
+  .reference-subtoolbar > span {
+    font-size: 8px;
+  }
+  .reference-subtoolbar > .text-link {
+    margin-left: auto;
+  }
+  .reference-list td {
+    padding: 17px;
+  }
+  .reference-source-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 13px;
+  }
+  .reference-source-grid > div {
+    padding: 17px;
+  }
+  .reference-profile {
+    grid-template-columns: 1fr;
+    padding: 7px 18px 20px;
+  }
+  .reference-profile > div:nth-child(-n + 4) {
+    grid-column: 1;
+  }
+  .reference-profile dd {
+    font-size: 11px;
+  }
+  .reference-targets {
+    grid-template-columns: 1fr;
+  }
+  .reference-card-content {
+    padding: 14px 18px 22px;
+  }
+  .reference-issues {
+    padding: 18px;
+  }
+  .reference-issues ul {
+    font-size: 10px;
+  }
+  .reference-citations > li {
+    font-size: 10px;
+  }
+}
+@media print {
+  .reference-print .print-watermark {
+    font-size: 72pt;
+  }
+  .reference-print section {
+    break-inside: avoid;
+  }
+  .reference-print p {
+    overflow-wrap: anywhere;
+  }
+}
+.quality-reference-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 21px;
+  background: #ecf5f8;
+  border: 1px solid #dcebf1;
+  border-radius: 8px;
+  margin-bottom: 22px;
+}
+.quality-reference-link b {
+  font-size: 12px;
+  color: #5e879b;
+  font-weight: 600;
+}
+.quality-reference-link p {
+  font-size: 10px;
+  color: #8aa6b4;
+  margin-top: 6px;
+}
+@media (max-width: 760px) {
+  .quality-reference-link {
+    padding: 17px;
+    flex-wrap: wrap;
+  }
+  .quality-reference-link b {
+    font-size: 11px;
+  }
+  .quality-reference-link p {
+    font-size: 9px;
+  }
+}
+@page quality-reference {
+  size: A4 portrait;
+  margin: 14mm 12mm 18mm;
+  @bottom-center {
+    content: "RSAS · REFERENSI — Halaman " counter(page) " / " counter(pages);
+    font-size: 8pt;
+    color: #667;
+  }
+}
+@media print {
+  .reference-print {
+    page: quality-reference;
+  }
+}

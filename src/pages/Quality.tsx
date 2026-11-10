@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import {
   startOfWeek,
   endOfWeek,
   startOfQuarter,
   endOfQuarter,
+  startOfMonth,
+  endOfMonth,
   format,
 } from "date-fns";
 import { Printer, Download, FileChartColumn, ShieldCheck } from "lucide-react";
@@ -31,8 +34,8 @@ export default function Quality() {
     from = format(startOfWeek(day, { weekStartsOn: 1 }), "yyyy-MM-dd");
     to = format(endOfWeek(day, { weekStartsOn: 1 }), "yyyy-MM-dd");
   } else if (period === "Bulanan") {
-    from = date.slice(0, 7) + "-01";
-    to = date.slice(0, 7) + "-31";
+    from = format(startOfMonth(day), "yyyy-MM-dd");
+    to = format(endOfMonth(day), "yyyy-MM-dd");
   } else if (period === "Triwulanan") {
     from = format(startOfQuarter(day), "yyyy-MM-dd");
     to = format(endOfQuarter(day), "yyyy-MM-dd");
@@ -142,6 +145,18 @@ export default function Quality() {
           Cetak Laporan Mutu
         </button>
       </PageHeading>
+      <section className="quality-reference-link">
+        <div>
+          <b>Indikator mutu prioritas RSAS</b>
+          <p>
+            Telusuri target dan definisi dari dokumen acuan, terpisah dari
+            laporan insiden demo.
+          </p>
+        </div>
+        <Link className="btn secondary" to="/indikator-mutu">
+          Buka Katalog Referensi <FileChartColumn size={16} />
+        </Link>
+      </section>
       <div className="filter-bar">
         <FileChartColumn size={18} />
         <b>Periode laporan</b>
@@ -179,7 +194,7 @@ export default function Quality() {
       </Card>
       <div className="analytics-grid">
         <Card title="Grafik Tren">
-          <TrendChart items={items} />
+          <TrendChart items={items} range={{ start: from, end: to }} />
         </Card>
         <Card title="Distribusi Risiko">
           <RiskDonut items={items} />

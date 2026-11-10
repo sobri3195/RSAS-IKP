@@ -12,6 +12,7 @@ import { useStore } from "../app/store";
 import { Card, Grade, Modal, Confirm, Empty } from "./ui";
 import {
   grades,
+  riskSchema,
   actionStatuses,
   actionSchema,
   type Incident,
@@ -46,12 +47,16 @@ export function RiskEditor({ incident }: { incident: Incident }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (!allowed) return;
           if (!risk.grade) return notify("Pilih salah satu grading.");
+          const assessment = riskSchema.safeParse(risk);
+          if (!assessment.success)
+            return notify(assessment.error.issues[0].message);
           if (
             upsert(
               {
                 ...incident,
-                riskAssessment: risk,
+                riskAssessment: assessment.data,
                 updatedAt: new Date().toISOString(),
               },
               `Grading manual ditetapkan: ${risk.grade}`,

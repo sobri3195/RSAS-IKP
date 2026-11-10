@@ -20,6 +20,14 @@ export const roles = [
 ] as const;
 export const grades = ["BIRU", "HIJAU", "KUNING", "MERAH"] as const;
 export const kinds = ["KPC", "KNC", "KTC", "KTD"] as const;
+export const nonPatientImpact = "Tidak relevan (non-pasien)";
+export const patientImpacts = [
+  "Kematian",
+  "Cedera irreversible / berat",
+  "Cedera reversible / sedang",
+  "Cedera ringan",
+  "Tidak ada cedera",
+] as const;
 export const formFields = [
   "patientName",
   "medicalNumber",
@@ -226,6 +234,14 @@ export const formSchema = formBase.superRefine((d, ctx) => {
       path: ["kind"],
       message: "Pilih jenis insiden.",
     });
+  if (d.target === "Pasien" && d.impact === nonPatientImpact)
+    ctx.addIssue({
+      code: "custom",
+      path: ["impact"],
+      message: "Pilih dampak terhadap pasien yang sesuai.",
+    });
+  // Existing demo backups may contain a clinical label for a non-patient case.
+  // Preserve those historical values; the wizard now offers only explicit N/A.
   ["ageYears", "ageMonths"].forEach((f) => {
     if (
       d[f as keyof FormData] &&
@@ -240,15 +256,46 @@ export const formSchema = formBase.superRefine((d, ctx) => {
       });
   });
 });
-export const riskSchema = z.object({
-  grade: z.enum(grades).nullable(),
-  impact: z.string(),
-  probability: z.string(),
-  notes: z.string(),
-  reason: z.string(),
-  assessor: z.string(),
-  date: z.string(),
-});
+const dateString = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .refine(
+    (v) =>
+      !isNaN(Date.parse(v)) && new Date(v).toISOString().slice(0, 10) === v,
+    "Tanggal tidak valid",
+  );
+export const riskSchema = z
+  .object({
+    grade: z.enum(grades).nullable(),
+    impact: z.string().trim(),
+    probability: z.string().trim(),
+    notes: z.string(),
+    reason: z.string().trim(),
+    assessor: z.string().trim(),
+    date: z.string(),
+  })
+  .superRefine((risk, ctx) => {
+    if (risk.grade === null) return;
+    for (const field of [
+      "impact",
+      "probability",
+      "reason",
+      "assessor",
+    ] as const) {
+      if (!risk[field])
+        ctx.addIssue({
+          code: "custom",
+          path: [field],
+          message: "Kolom ini wajib diisi untuk penetapan grading.",
+        });
+    }
+    if (!dateString.safeParse(risk.date).success)
+      ctx.addIssue({
+        code: "custom",
+        path: ["date"],
+        message: "Tanggal grading tidak valid.",
+      });
+  });
 export const incidentSchema = z.object({
   id: z.string().uuid(),
   displayNumber: z.string().regex(/^RSAS-IKP-\d{4}-\d{4,}$/),
@@ -293,23 +340,15 @@ export const actionStatuses = [
   "Menunggu Evaluasi",
   "Selesai",
 ] as const;
-const dateString = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/)
-  .refine(
-    (v) =>
-      !isNaN(Date.parse(v)) && new Date(v).toISOString().slice(0, 10) === v,
-    "Tanggal tidak valid",
-  );
 export const actionSchema = z
   .object({
     id: z.string().uuid(),
     incidentId: z.string().uuid(),
-    problem: z.string().min(1),
-    corrective: z.string().min(1),
-    preventive: z.string().min(1),
-    owner: z.string().min(1),
-    unit: z.string().min(1),
+    problem: z.string().trim().min(1),
+    corrective: z.string().trim().min(1),
+    preventive: z.string().trim().min(1),
+    owner: z.string().trim().min(1),
+    unit: z.string().trim().min(1),
     start: dateString,
     target: dateString,
     realized: z.union([z.literal(""), dateString]),
