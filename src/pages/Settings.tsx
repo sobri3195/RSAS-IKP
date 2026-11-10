@@ -145,9 +145,8 @@ export function Settings() {
         <p>RSAS-SAFETY · RSAU Prof. dr. Abdulrachman Saleh</p>
         <p>Sagraha Abhipraya Nawasena · Kesehatan untuk Kedaulatan</p>
         <p className="muted">
-          Tempat logo resmi tersedia. Untuk menggantinya, tempatkan file resmi
-          dengan nama <code>logo-rsas.svg</code> di direktori{" "}
-          <code>public/assets/</code>. Tidak ada logo rumah sakit rekaan.
+          Logo RSAS pada aplikasi, dokumen cetak, dan ikon browser menggunakan
+          gambar yang disediakan institusi melalui repository proyek.
         </p>
       </Card>
       <Card title="Kelola Ulang Data" className="danger-zone">

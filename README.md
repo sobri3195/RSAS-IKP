@@ -89,7 +89,7 @@ Konfigurasi E2E menggunakan Chromium sistem pada `/usr/bin/chromium` bila tersed
 
 ## Logo resmi
 
-`public/assets/logo-rsas.svg` hanya placeholder teks **LOGO RSAS**, bukan logo institusi rekaan. Ganti dengan file SVG resmi dari institusi. Header cetak juga menyediakan ruang logo. Tidak ada permintaan font atau analytics pihak ketiga.
+Logo memakai gambar yang disediakan pengguna pada `docs/WhatsApp Image 2026-11-05 at 08.20.42.jpeg`. Aset `public/assets/logo-rsas.png` adalah versi 512×512 tanpa perubahan desain. Logo digunakan di sidebar, halaman masuk, laporan mutu, dan dokumen cetak. Favicon ICO (16/32/48 px), PNG 32 px, serta ikon Apple 180 px dibuat dari gambar yang sama. Tidak ada gambar/logo hasil generasi.
 
 ## Vercel
 

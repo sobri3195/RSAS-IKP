@@ -169,22 +169,13 @@ export function Confirm({
 }
 export function Logo({ large = false }: { large?: boolean }) {
   return (
-    <div
-      className={`logo-placeholder ${large ? "large" : ""}`}
-      title="Placeholder — ganti dengan logo resmi RSAS"
-    >
+    <div className={`brand-logo ${large ? "large" : ""}`}>
       <img
-        src="/assets/logo-rsas.svg"
-        alt="Tempat logo resmi RSAS"
-        onError={(e) => {
-          e.currentTarget.style.display = "none";
-        }}
+        src="/assets/logo-rsas.png"
+        alt="Logo RSAU Prof. dr. Abdulrachman Saleh"
+        width="512"
+        height="512"
       />
-      <span>
-        LOGO
-        <br />
-        RSAS
-      </span>
     </div>
   );
 }

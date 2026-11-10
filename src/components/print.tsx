@@ -42,9 +42,7 @@ export function PrintSheet({ incident }: { incident: Incident }) {
       <div className="print-watermark">DATA DEMO</div>
       <header>
         <div className="print-logo">
-          LOGO
-          <br />
-          RSAS
+          <img src="/assets/logo-rsas.png" alt="Logo RSAS" />
         </div>
         <div>
           <h2>RSAU Prof. dr. Abdulrachman Saleh</h2>

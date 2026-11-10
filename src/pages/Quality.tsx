@@ -12,7 +12,7 @@ import {
 } from "date-fns";
 import { Printer, Download, FileChartColumn, ShieldCheck } from "lucide-react";
 import { useStore } from "../app/store";
-import { Card, PageHeading } from "../components/ui";
+import { Card, PageHeading, Logo } from "../components/ui";
 import { TrendChart, Bars, RiskDonut } from "../components/charts";
 import {
   aggregate,
@@ -182,7 +182,7 @@ export default function Quality() {
       </div>
       <Card className="quality-summary">
         <div className="report-letterhead">
-          <ShieldCheck size={34} />
+          <Logo large />
           <div>
             <span>RSAU PROF. DR. ABDULRACHMAN SALEH</span>
             <h2>Laporan Mutu Keselamatan Pasien</h2>
@@ -217,6 +217,11 @@ export default function Quality() {
       </div>
       {createPortal(
         <article className="print-document">
+          <img
+            className="print-rsas-logo"
+            src="/assets/logo-rsas.png"
+            alt="Logo RSAS"
+          />
           <h1>RSAU Prof. dr. Abdulrachman Saleh</h1>
           <h2>Laporan Mutu Keselamatan Pasien</h2>
           <p>
