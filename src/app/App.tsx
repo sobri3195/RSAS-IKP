@@ -1,37 +1,26 @@
 import {
   BrowserRouter,
-  Routes,
+  Navigate,
   Route,
-  Link,
+  Routes,
   useLocation,
 } from "react-router-dom";
-import { useEffect, lazy, Suspense } from "react";
-import { Provider } from "./store";
-import { Layout } from "../components/layout";
-import { Empty } from "../components/ui";
-const Dashboard = lazy(() => import("../pages/Dashboard"));
-const Reports = lazy(() => import("../pages/Reports"));
-const IncidentForm = lazy(() => import("../pages/IncidentForm"));
-const Detail = lazy(() => import("../pages/Detail"));
-const Workbench = lazy(() => import("../pages/Workbench"));
-const Analytics = lazy(() => import("../pages/Analytics"));
-const QualityCatalog = lazy(() => import("../pages/QualityCatalog"));
-const Quality = lazy(() => import("../pages/Quality"));
-const Settings = lazy(() =>
-  import("../pages/Settings").then((m) => ({ default: m.Settings })),
+import { lazy, Suspense, useEffect } from "react";
+import PublicReport, { TrackReport } from "../pages/PublicReport";
+import {
+  CommitteeEnroll,
+  CommitteeGuard,
+  CommitteeLogin,
+} from "../pages/CommitteeAuth";
+const CommitteeLayout = lazy(() =>
+  import("../pages/CommitteeDashboard").then((m) => ({
+    default: m.CommitteeLayout,
+  })),
 );
-const Units = lazy(() =>
-  import("../pages/Settings").then((m) => ({ default: m.Units })),
-);
-const ActivityPage = lazy(() =>
-  import("../pages/Settings").then((m) => ({ default: m.ActivityPage })),
-);
-const Help = lazy(() =>
-  import("../pages/Help").then((m) => ({ default: m.Help })),
-);
-const Login = lazy(() =>
-  import("../pages/Help").then((m) => ({ default: m.Login })),
-);
+const Dashboard = lazy(() => import("../pages/CommitteeDashboard"));
+const Detail = lazy(() => import("../pages/CommitteeDetail"));
+const Tools = lazy(() => import("../pages/CommitteeTools"));
+const Catalog = lazy(() => import("../pages/QualityCatalog"));
 function ScrollReset() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -41,51 +30,58 @@ function ScrollReset() {
 }
 export default function App() {
   return (
-    <Provider>
-      <BrowserRouter>
-        <ScrollReset />
-        <Suspense
-          fallback={
-            <div className="loading-state" role="status">
-              <span />
-              Memuat ruang kerja RSAS…
-            </div>
-          }
-        >
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route element={<Layout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="laporan" element={<Reports />} />
-              <Route path="laporan/baru" element={<IncidentForm />} />
+    <BrowserRouter>
+      <ScrollReset />
+      <Suspense
+        fallback={
+          <div className="loading-state" role="status">
+            Memuat RSAS…
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Navigate to="/lapor" replace />} />
+          <Route path="/lapor" element={<PublicReport />} />
+          <Route path="/lacak" element={<TrackReport />} />
+          <Route path="/komite/login" element={<CommitteeLogin />} />
+          <Route path="/komite/aktivasi" element={<CommitteeEnroll />} />
+          <Route element={<CommitteeGuard />}>
+            <Route path="/komite" element={<CommitteeLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
               <Route path="laporan/:id" element={<Detail />} />
-              <Route path="laporan/:id/edit" element={<IncidentForm />} />
-              <Route path="verifikasi" element={<Reports verification />} />
-              <Route path="grading" element={<Workbench mode="risk" />} />
-              <Route path="investigasi" element={<Workbench mode="rca" />} />
-              <Route path="tindak-lanjut" element={<Workbench mode="capa" />} />
-              <Route path="analisis" element={<Analytics />} />
-              <Route path="mutu" element={<Quality />} />
-              <Route path="indikator-mutu" element={<QualityCatalog />} />
-              <Route path="indikator-mutu/:id" element={<QualityCatalog />} />
-              <Route path="aktivitas" element={<ActivityPage />} />
-              <Route path="unit" element={<Units />} />
-              <Route path="pengaturan" element={<Settings />} />
-              <Route path="bantuan" element={<Help />} />
+              <Route path="qr" element={<Tools mode="qr" />} />
+              <Route path="audit" element={<Tools mode="audit" />} />
+              <Route path="akun" element={<Tools mode="accounts" />} />
+              <Route path="unit" element={<Tools mode="units" />} />
+              <Route path="data" element={<Tools mode="data" />} />
+              <Route path="indikator-mutu" element={<Catalog />} />
+              <Route path="indikator-mutu/:id" element={<Catalog />} />
               <Route
                 path="*"
-                element={
-                  <Empty title="Halaman tidak ditemukan">
-                    <Link className="btn primary" to="/">
-                      Kembali ke Dashboard
-                    </Link>
-                  </Empty>
-                }
+                element={<Navigate to="/komite/dashboard" replace />}
               />
             </Route>
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </Provider>
+          </Route>
+          <Route
+            path="/laporan/baru"
+            element={<Navigate to="/lapor" replace />}
+          />
+          <Route
+            path="/indikator-mutu"
+            element={<Navigate to="/komite/indikator-mutu" replace />}
+          />
+          <Route path="/indikator-mutu/:id" element={<LegacyCatalog />} />
+          <Route
+            path="*"
+            element={<Navigate to="/komite/dashboard" replace />}
+          />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
+}
+function LegacyCatalog() {
+  const { pathname } = useLocation();
+  return <Navigate to={`/komite${pathname}`} replace />;
 }

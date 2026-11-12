@@ -1,349 +1,331 @@
-import { test, expect } from "@playwright/test";
-test.beforeEach(async ({ page }) => {
+import { test, expect, request } from "@playwright/test";
+import { publicWizard } from "./helpers";
+import { fixturePassword, testOrigin } from "../server/testing";
+import { totp } from "../server/security";
+
+test("root and QR unit links open the public form with no private navigation or storage", async ({
+  page,
+}) => {
   await page.goto("/");
+  await expect(page).toHaveURL(/\/lapor$/);
   await expect(
-    page.getByRole("heading", { name: "Dashboard Keselamatan Pasien" }),
+    page.getByRole("heading", { name: /Laporkan untuk/ }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /dashboard|komite|analitik|login/i }),
+  ).toHaveCount(0);
+  await expect(page.locator(".committee-sidebar")).toHaveCount(0);
+  await page.goto("/lapor?unit=igd");
+  await expect(page.getByLabel("Unit pelapor")).toHaveValue("igd");
+  await page.getByLabel("Unit pelapor").selectOption("farmasi");
+  await expect(page.getByLabel("Unit pelapor")).toHaveValue("farmasi");
+  await page.goto("/lapor?unit=unknown");
+  await page.reload();
+  await expect(page.getByLabel("Unit pelapor")).toHaveValue("");
+  await expect
+    .poll(() => page.evaluate(() => Object.keys(localStorage).length))
+    .toBe(0);
 });
-test("draft: create, autosave, refresh, reopen, edit and required validation", async ({
+
+test("public reporting validates fields, submits anonymously, tracks safely and issues a patient-free receipt", async ({
   page,
 }) => {
-  await page
-    .getByRole("link", { name: "Buat Laporan", exact: true })
-    .first()
-    .click();
-  await page.getByRole("button", { name: "Selanjutnya" }).click();
+  await page.goto("/lapor");
+  await page.getByRole("button", { name: "Berikutnya" }).click();
   await expect(page.getByText("Kolom ini wajib diisi.").first()).toBeVisible();
-  await page.getByLabel("Nama pasien fiktif").fill("Pasien Demo Uji");
-  await page.getByRole("button", { name: "Simpan Draft" }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          JSON.parse(localStorage.getItem("rsas_safety_v1_incidents")!).length,
-      ),
-    )
-    .toBe(16);
-  await page.goto("/laporan");
-  await page.getByLabel("Cari nomor atau judul laporan").fill("tanpa judul");
-  await page.getByRole("link", { name: "Laporan tanpa judul" }).click();
-  await page.getByRole("link", { name: "Edit Laporan" }).click();
-  await expect(page.getByLabel("Nama pasien fiktif")).toHaveValue(
-    "Pasien Demo Uji",
-  );
-  await page.getByLabel("Nama pasien fiktif").fill("Pasien Demo Ubah");
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          JSON.parse(localStorage.getItem("rsas_safety_v1_incidents")!).find(
-            (i: any) => i.incident.patientName === "Pasien Demo Ubah",
-          )?.incident.patientName,
-      ),
-    )
-    .toBe("Pasien Demo Ubah");
-  await page.reload();
-  await expect(page.getByLabel("Nama pasien fiktif")).toHaveValue(
-    "Pasien Demo Ubah",
-  );
-});
-test("wizard: complete 14 questions, review, submit and transition status", async ({
-  page,
-}) => {
-  await page.goto("/laporan/baru");
-  await page.getByLabel("Nama pasien fiktif").fill("Pasien Demo E2E");
-  await page.getByLabel("Nomor rekam medis demo").fill("DEMO-E2E");
-  await page.getByLabel("Ruangan", { exact: false }).fill("Ruang Demo");
-  await page.getByLabel("Jenis kelamin").selectOption("Perempuan");
-  await page.getByLabel("Umur (tahun)").fill("30");
-  await page.getByLabel("Umur (bulan)").fill("0");
-  await page.getByLabel("Kelompok umur").selectOption(">15 tahun–30 tahun");
-  await page.getByLabel("Penanggung biaya").selectOption("BPJS");
-  await page.getByLabel("Tanggal masuk RS").fill("2026-01-01");
-  await page.getByLabel("Jam masuk RS").fill("07:00");
-  await page.getByRole("button", { name: "Selanjutnya" }).click();
-  await page.getByLabel("1. Tanggal insiden").fill("2026-01-01");
-  await page.getByLabel("1. Jam insiden").fill("08:00");
-  await page.getByLabel("2. Judul singkat insiden").fill("Insiden Demo E2E");
+  await publicWizard(page);
   await page
-    .getByLabel("3. Kronologis insiden")
-    .fill("Kronologi sintetis lengkap untuk pengujian alur pelaporan.");
-  await page.getByLabel("4. Jenis insiden").selectOption("KNC");
-  await page.getByRole("button", { name: "Selanjutnya" }).click();
-  await page.getByLabel("5. Orang pertama").selectOption("Perawat");
-  await page.getByLabel("7. Jenis pelayanan").selectOption("Rawat inap");
-  await page.getByRole("button", { name: "Selanjutnya" }).click();
-  await page.getByLabel("8. Unit tempat insiden").selectOption("IGD (contoh)");
-  await page.getByLabel("8. Lokasi spesifik").fill("Area Demo");
-  await page.getByLabel("9. Spesialisasi").selectOption("Anak");
-  await page
-    .getByLabel("10. Unit / departemen")
-    .selectOption("Rawat Inap (contoh)");
-  await page.getByRole("button", { name: "Selanjutnya" }).click();
-  await page.getByLabel("Tidak ada cedera", { exact: true }).check();
-  await page.getByRole("button", { name: "Selanjutnya" }).click();
-  await page
-    .getByLabel("12. Tindakan yang telah dilakukan")
-    .fill("Pemeriksaan ulang skenario demo");
-  await page.getByLabel("12. Hasil tindakan").fill("Kondisi demo terkendali");
-  await page.getByLabel("12. Jam tindakan").fill("08:05");
-  await page.getByLabel("13. Tindakan dilakukan oleh").selectOption("Perawat");
-  await page
-    .getByLabel("14. Pernah terjadi di unit lain?")
-    .selectOption("Tidak");
-  await page.getByRole("button", { name: "Selanjutnya" }).click();
-  await page.getByLabel("Nama pembuat laporan").fill("Petugas Demo");
-  await page.getByLabel("Jabatan pembuat").fill("Perawat");
-  await page.getByLabel("Paraf pembuat").fill("PD");
-  await page.getByLabel("Nama penerima laporan").fill("Kepala Demo");
-  await page.getByLabel("Jabatan penerima").fill("Kepala Unit");
-  await page.getByLabel("Paraf penerima").fill("KD");
-  await page.getByRole("button", { name: "Selanjutnya" }).click();
+    .getByLabel("Referensi pasien minimal")
+    .fill("SYNTHETIC-ONLY-REFERENCE");
+  await page.getByLabel("Nomor rekam medis").fill("TEST-NOT-A-PATIENT");
+  await page.getByRole("button", { name: "Berikutnya" }).click();
   await expect(
-    page.locator("#main").getByText("14. Kejadian serupa di unit lain"),
+    page.getByText("SYNTHETIC-ONLY-REFERENCE", { exact: true }),
   ).toBeVisible();
-  await page.getByLabel("Saya memastikan seluruh data").check();
-  await page.getByRole("button", { name: "Kirim Laporan Demo" }).click();
-  await page.getByRole("button", { name: "Ya, lanjutkan" }).click();
+  await page.getByLabel("Laporan dibuat berdasarkan fakta").check();
+  await page.getByRole("button", { name: "KIRIM LAPORAN IKP" }).click();
   await expect(
-    page.getByRole("heading", { name: "Insiden Demo E2E" }),
+    page.getByRole("heading", { name: "Terima kasih telah melaporkan." }),
   ).toBeVisible();
-  await expect(page.locator(".detail-status")).toContainText(
-    "Menunggu verifikasi",
-  );
-  // The pending autosave debounce must not undo submission during navigation.
-  await page.waitForTimeout(1800);
-  await page.reload();
-  await expect(page.locator(".detail-status")).toContainText(
-    "Menunggu verifikasi",
-  );
-  await page.getByRole("button", { name: "Diterima", exact: true }).click();
-  await page.getByRole("button", { name: "Ya, lanjutkan" }).click();
-  await expect(page.locator(".detail-status")).toContainText("Diterima");
-  await page.getByRole("tab", { name: "Workflow & Aktivitas" }).click();
-  await expect(page.locator(".timeline")).toContainText(
-    "Menunggu verifikasi → Diterima",
-  );
-});
-test("manual grading, RCA, CAPA create and complete", async ({ page }) => {
-  await page.goto("/grading");
-  await page.getByLabel("MERAH").check();
-  await page.getByLabel("Dampak yang dinilai").fill("Dampak skenario demo");
-  await page
-    .getByLabel("Probabilitas yang dinilai")
-    .fill("Probabilitas skenario demo");
-  await page.getByLabel("Alasan penilaian").fill("Bukti sintetis");
-  await page.getByLabel("Nama penilai demo").fill("Penilai Demo");
-  await page.getByLabel("Tanggal grading").fill("2026-01-01");
-  await page.getByLabel("Saya mengonfirmasi").check();
-  await page.getByRole("button", { name: "Simpan Grading Manual" }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          JSON.parse(localStorage.getItem("rsas_safety_v1_incidents")!)[0]
-            .riskAssessment.grade,
-      ),
-    )
-    .toBe("MERAH");
-  await page.goto("/investigasi");
-  await page
-    .getByRole("textbox", { name: "Masalah utama", exact: true })
-    .fill("Masalah Demo Teruji");
-  await page.getByRole("button", { name: "Tambahkan Akar Masalah" }).click();
-  await page
-    .getByLabel("Akar masalah 2")
-    .fill("Akar masalah berdasarkan skenario");
-  await page.getByRole("button", { name: "Simpan Investigasi" }).click();
-  await page.reload();
+  await expect(page).toHaveURL(/\/lapor/);
   await expect(
-    page.getByRole("textbox", { name: "Masalah utama", exact: true }),
-  ).toHaveValue("Masalah Demo Teruji");
-  await page.goto("/tindak-lanjut");
-  await page.getByRole("button", { name: "Tambah CAPA" }).click();
-  await page
-    .getByLabel("Tindakan korektif", { exact: true })
-    .fill("Uji perbaikan demo");
-  await page
-    .getByLabel("Tindakan preventif", { exact: true })
-    .fill("Pencegahan demo");
-  await page.getByLabel("Penanggung jawab demo").fill("PIC Demo");
-  await page.getByLabel("Tanggal mulai").fill("2026-01-01");
-  await page.getByLabel("Target selesai").fill("2026-01-03");
-  await page.getByRole("button", { name: "Simpan CAPA" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Uji perbaikan demo" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Edit CAPA" }).click();
-  await page
-    .getByRole("combobox", { name: "Status", exact: true })
-    .selectOption("Selesai");
-  await page.getByLabel("Tanggal realisasi").fill("2026-01-02");
-  await page.getByLabel("Bukti (catatan teks demo)").fill("Bukti teks demo");
-  await page.getByLabel("Evaluasi efektivitas").fill("Evaluasi demo selesai");
-  await page.getByLabel("Catatan reviewer").fill("Ditinjau reviewer demo");
-  await page.getByRole("button", { name: "Simpan CAPA" }).click();
-  await expect(page.locator(".capa-summary")).toContainText("100%");
-  await page.reload();
-  await expect(page.locator(".action-item")).toContainText("Selesai");
-});
-test("search, unit filter and dashboard counts use persisted data", async ({
-  page,
-}) => {
-  await expect(page.locator(".kpi").first().locator("strong")).toContainText(
-    "15",
-  );
-  await page
-    .getByRole("combobox", { name: "Filter unit", exact: true })
-    .selectOption("IGD (contoh)");
-  await expect(page.locator(".kpi").first().locator("strong")).toContainText(
-    "03",
-  );
-  await page.goto("/laporan");
-  await page
-    .getByLabel("Cari nomor atau judul laporan")
-    .fill("Kesalahan label");
-  await expect(page.locator("tbody tr")).toHaveCount(1);
-  await expect(page.locator("tbody")).toContainText(
-    `RSAS-IKP-${new Date().getFullYear()}-0001`,
-  );
-});
-test("JSON export, validated restore, invalid restore and reset", async ({
-  page,
-}) => {
-  await page.goto("/pengaturan");
-  const dlPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Ekspor JSON", exact: true }).click();
-  const dl = await dlPromise;
-  expect(dl.suggestedFilename()).toBe("rsas-safety-demo-backup.json");
-  const backup = await page.evaluate(() => ({
-    schemaVersion: 1,
-    ...Object.fromEntries(
-      [
-        "settings",
-        "incidents",
-        "investigations",
-        "actions",
-        "activity",
-        "units",
-      ].map((f) => [
-        f,
-        JSON.parse(localStorage.getItem("rsas_safety_v1_" + f)!),
-      ]),
-    ),
-  }));
-  await page.getByLabel("Berkas backup JSON").setInputFiles({
-    name: "bad.json",
-    mimeType: "application/json",
-    buffer: Buffer.from("{bad"),
-  });
-  await expect(page.getByRole("status")).toContainText("JSON tidak valid");
-  await page.getByLabel("Berkas backup JSON").setInputFiles({
-    name: "backup.json",
-    mimeType: "application/json",
-    buffer: Buffer.from(JSON.stringify(backup)),
-  });
-  await expect(page.getByRole("dialog")).toContainText(
-    "15 laporan tervalidasi",
-  );
-  await page.getByRole("button", { name: "Ya, lanjutkan" }).click();
-  await expect(page.getByRole("dialog")).not.toBeVisible();
-  await page.getByRole("button", { name: "Hapus Semua Laporan Demo" }).click();
-  // Exercise keyboard cancellation as well as pointer confirmation.
-  await page.getByRole("button", { name: "Batal", exact: true }).press("Enter");
-  await expect(page.getByRole("dialog")).not.toBeVisible();
-  await expect(page.locator(".storage-summary")).toContainText("15 laporan");
-  await page
-    .getByRole("button", { name: "Reset ke 15 Contoh Insiden" })
-    .click();
-  await page.getByRole("button", { name: "Ya, lanjutkan" }).click();
-  await expect(page.locator(".storage-summary")).toContainText("15 laporan");
-});
-test("corrupt localStorage is preserved until explicit recovery", async ({
-  page,
-}) => {
-  await page.evaluate(() =>
-    localStorage.setItem("rsas_safety_v1_incidents", "{broken"),
-  );
-  await page.reload();
-  await expect(page.getByRole("alert")).toContainText("tidak dapat dibaca");
+    page.getByText("SYNTHETIC-ONLY-REFERENCE", { exact: true }),
+  ).toHaveCount(0);
+  const code = await page.locator(".tracking-code").innerText();
+  expect(code).toMatch(/^[a-f\d]{64}$/);
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Simpan bukti penerimaan" }).click();
+  const receipt = await download;
+  const stream = await receipt.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const part of stream!) chunks.push(part);
+  const text = Buffer.concat(chunks).toString();
+  expect(text).toContain("IKP-RSAS-");
+  expect(text).not.toContain("TEST-NOT-A-PATIENT");
   expect(
-    await page.evaluate(() => localStorage.getItem("rsas_safety_v1_incidents")),
-  ).toBe("{broken");
-  await page.goto("/pengaturan");
+    await page.evaluate(() => [localStorage.length, sessionStorage.length]),
+  ).toEqual([0, 0]);
   await page
-    .getByRole("button", { name: "Reset ke 15 Contoh Insiden" })
+    .getByRole("link", { name: "Cek status laporan", exact: true })
     .click();
-  await page.getByRole("button", { name: "Ya, lanjutkan" }).click();
-  await expect(page.getByRole("alert")).not.toBeVisible();
+  await page.getByLabel("Kode pelacakan rahasia").fill(code);
+  await page.getByRole("button", { name: "Cek status", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Laporan baru");
+  await expect(
+    page.getByText("SYNTHETIC-ONLY-REFERENCE", { exact: true }),
+  ).toHaveCount(0);
 });
-test("A4 print includes complete questions and demo watermark", async ({
+
+test("mobile form fits the viewport and refresh clears sensitive drafts", async ({
   page,
 }) => {
-  await page
-    .getByRole("link", {
-      name: "Kesalahan label obat terdeteksi sebelum pemberian",
-      exact: true,
-    })
-    .first()
-    .click();
-  await page.emulateMedia({ media: "print" });
-  await expect(page.locator(".print-document")).toBeVisible();
-  await expect(
-    page.locator(".print-document tbody").nth(1).locator("tr"),
-  ).toHaveCount(14);
-  await expect(page.locator(".print-watermark")).toBeVisible();
-  await expect(page.locator(".print-document")).toContainText("Pembuat");
-  await expect(page.locator("#root")).not.toBeVisible();
-  await page.pdf({
-    path: "test-results/rsas-demo-report.pdf",
-    format: "A4",
-    printBackground: true,
-    preferCSSPageSize: true,
+  await page.setViewportSize({ width: 390, height: 844 });
+  await publicWizard(page);
+  await page.getByLabel("Referensi pasien minimal").fill("SYNTHETIC-DRAFT");
+  await expect(page.getByRole("status")).toContainText(
+    "Draft sementara diperbarui",
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  expect(
+    await page.evaluate(() =>
+      JSON.stringify({ ...localStorage, ...sessionStorage }),
+    ),
+  ).not.toContain("SYNTHETIC-DRAFT");
+  await page.screenshot({
+    path: "test-results/public-report-mobile.png",
+    fullPage: true,
   });
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Informasi kejadian", exact: true }),
+  ).toBeVisible();
 });
-test("all pages render without runtime errors, mobile navigation has no overflow", async ({
+
+test("a failed network submission preserves the in-memory form and can be retried", async ({
   page,
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  for (const url of [
-    "/verifikasi",
-    "/grading",
-    "/investigasi",
-    "/tindak-lanjut",
-    "/analisis",
-    "/mutu",
-    "/aktivitas",
-    "/unit",
-    "/pengaturan",
-    "/bantuan",
-    "/login",
-  ]) {
-    await page.goto(url);
-    await expect(page.locator("h1,h2").first()).toBeVisible();
-  }
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  await page.getByRole("button", { name: "Buka menu" }).click();
-  await page.getByRole("link", { name: "Semua Laporan", exact: true }).click();
+  await publicWizard(page);
+  await page.getByRole("button", { name: "Berikutnya" }).click();
+  await page.getByLabel("Laporan dibuat berdasarkan fakta").check();
+  await page.route("**/api/public/reports", (route) => route.abort("failed"));
+  await page.getByRole("button", { name: "KIRIM LAPORAN IKP" }).click();
+  await expect(page.getByRole("alert")).toContainText("Koneksi terputus");
   await expect(
-    page.getByRole("heading", { name: "Semua Laporan Insiden" }),
+    page.getByText("Kronologi sintetis tanpa pasien nyata", { exact: true }),
   ).toBeVisible();
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBe(true);
-  await page.goto("/laporan/baru");
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBe(true);
-  await page.screenshot({
-    path: "test-results/rsas-mobile-form.png",
-    fullPage: true,
-  });
+  await expect(
+    page.getByRole("button", { name: "KIRIM LAPORAN IKP" }),
+  ).toBeEnabled();
+  await page.unroute("**/api/public/reports");
+  await page.getByRole("button", { name: "KIRIM LAPORAN IKP" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Terima kasih telah melaporkan." }),
+  ).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test("direct private URLs and old routes require login without returning report data", async ({
+  page,
+  request,
+}) => {
+  for (const path of [
+    "/komite/dashboard",
+    "/laporan",
+    "/analisis",
+    "/pengaturan",
+  ]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/komite\/login$/);
+    await expect(page.locator(".committee-sidebar")).toHaveCount(0);
+  }
+  for (const path of [
+    "/api/committee/reports",
+    "/api/committee/export/pdf",
+    "/api/committee/export/xlsx",
+    "/api/committee/backup",
+  ]) {
+    const response = await request.get(path);
+    expect(response.status()).toBe(401);
+  }
+});
+
+test.describe("authenticated ordinary user", () => {
+  test.use({ storageState: ".local-data/user-session.json" });
+  test("receives HTTP 403 and cannot reach the dashboard after refresh", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/komite/dashboard");
+    await expect(
+      page.getByRole("heading", { name: "403 · Akses ditolak" }),
+    ).toBeVisible();
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { name: "403 · Akses ditolak" }),
+    ).toBeVisible();
+    expect((await request.get("/api/committee/reports")).status()).toBe(403);
+    expect((await request.get("/api/committee/export/xlsx")).status()).toBe(
+      403,
+    );
+  });
+});
+
+test("committee invitation, real password plus MFA login, review, audit, logout and cookie replay", async ({
+  page,
+}) => {
+  const manager = await request.newContext({
+    baseURL: testOrigin,
+    storageState: ".local-data/komite_mutu-session.json",
+    extraHTTPHeaders: { Origin: testOrigin },
+  });
+  const session = await (await manager.get("/api/auth/session")).json();
+  const email = `synthetic-${Date.now()}@example.test`;
+  const inviteResponse = await manager.post("/api/committee/accounts", {
+    headers: { "X-CSRF-Token": session.csrf },
+    data: { name: "Synthetic browser reviewer", email },
+  });
+  expect(inviteResponse.status()).toBe(201);
+  const invitation = (await inviteResponse.json()).invitation;
+  const setup = await (
+    await manager.post("/api/auth/enroll/start", { data: { invitation } })
+  ).json();
+  expect(
+    (
+      await manager.post("/api/auth/enroll/complete", {
+        data: {
+          invitation,
+          password: fixturePassword,
+          otp: totp(setup.secret).generate(),
+        },
+      })
+    ).status(),
+  ).toBe(204);
+  await page.goto("/komite/login");
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Kata sandi", { exact: true }).fill(fixturePassword);
+  await page
+    .getByLabel("Kode autentikator MFA")
+    .fill(totp(setup.secret).generate({ timestamp: Date.now() + 30000 }));
+  await page.getByRole("button", { name: "Masuk ke Komite Mutu" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Dashboard Keselamatan Pasien" }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator(".committee-main tbody tr")
+      .filter({ has: page.getByRole("link", { name: /IKP-RSAS-/ }) })
+      .first(),
+  ).toBeVisible();
+  await page
+    .getByRole("link", { name: /IKP-RSAS-/ })
+    .first()
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Informasi laporan", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "Status", exact: true })
+    .selectOption("under_review");
+  await page
+    .getByLabel("Catatan validasi")
+    .fill("Peninjauan browser dengan data sintetis");
+  await page
+    .getByRole("button", { name: "Simpan validasi & tindak lanjut" })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "Perubahan tersimpan di server",
+  );
+  await expect(
+    page.getByRole("combobox", { name: "Status", exact: true }),
+  ).toHaveValue("under_review");
+  await page
+    .getByRole("combobox", { name: "Status", exact: true })
+    .selectOption("validated");
+  await page
+    .getByLabel("Catatan validasi")
+    .fill("Validasi browser dengan data sintetis");
+  await page
+    .getByRole("button", { name: "Simpan validasi & tindak lanjut" })
+    .click();
+  await expect(
+    page.getByRole("combobox", { name: "Status", exact: true }),
+  ).toHaveValue("validated");
+  await page.getByRole("link", { name: "Lihat audit laporan" }).click();
+  await expect(
+    page.getByText("report.reviewed", { exact: true }).first(),
+  ).toBeVisible();
+  const cookies = await page.context().cookies();
+  const old = cookies.find((c) => c.name === "rsas_session")!;
+  expect(old.httpOnly).toBe(true);
+  await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await expect(page).toHaveURL(/\/komite\/login$/);
+  const replay = await request.newContext({
+    baseURL: testOrigin,
+    extraHTTPHeaders: { Cookie: `rsas_session=${old.value}` },
+  });
+  expect((await replay.get("/api/committee/reports")).status()).toBe(401);
+  await replay.dispose();
+  await manager.dispose();
+  await page.goto("/komite/dashboard");
+  await expect(page).toHaveURL(/\/komite\/login$/);
+});
+
+test.describe("committee tools", () => {
+  test.use({ storageState: ".local-data/komite_mutu-session.json" });
+  test("QR downloads, private exports and dashboard filters work on real API data", async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    await page.goto("/komite/dashboard");
+    await expect(
+      page.getByRole("heading", { name: "Dashboard Keselamatan Pasien" }),
+    ).toBeVisible();
+    await page
+      .getByRole("combobox", { name: "Unit", exact: true })
+      .selectOption("igd");
+    await expect(page).toHaveURL(/unit=igd/);
+    await expect(
+      page.getByRole("link", { name: /IKP-RSAS-/ }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "KNC: 1", exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "2026-01: 1", exact: true }).click();
+    await expect(page).toHaveURL(/from=2026-01-01/);
+    await expect(page.locator(".recharts-pie-sector path")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /IKP-RSAS-/ }).first(),
+    ).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({
+      path: "test-results/committee-dashboard.png",
+      fullPage: true,
+    });
+    const dl = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Ekspor Excel" }).click();
+    expect((await dl).suggestedFilename()).toBe("rsas-ikp.xlsx");
+    await page.getByRole("link", { name: "QR pelaporan" }).click();
+    await page.getByLabel("Unit otomatis").selectOption("igd");
+    await expect(page.locator(".qr-poster code")).toContainText(
+      "/lapor?unit=igd",
+    );
+    const qr = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Unduh QR SVG" }).click();
+    expect((await qr).suggestedFilename()).toBe("rsas-lapor.svg");
+    await page.emulateMedia({ media: "print" });
+    await expect(page.locator(".qr-poster")).toBeVisible();
+    await page.emulateMedia({ media: "screen" });
+    await page.screenshot({
+      path: "test-results/committee-qr.png",
+      fullPage: true,
+    });
+    expect(errors).toEqual([]);
+  });
 });

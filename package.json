@@ -5,37 +5,67 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && tsc -p tsconfig.server.json && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "dev:api": "tsx --env-file=.env server/index.ts",
+    "db:migrate": "tsx --env-file=.env server/cli.ts migrate",
+    "account:invite": "tsx --env-file=.env server/cli.ts invite",
+    "test:api": "vitest run --config vitest.server.config.ts",
+    "test:serve": "tsx scripts/test-server.ts",
+    "account:recover": "tsx --env-file=.env server/cli.ts recover"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
     "@hookform/resolvers": "^7.0.5",
     "@tailwindcss/vite": "^4.3.5",
     "date-fns": "^4.4.0",
+    "exceljs": "^4.4.0",
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
     "lucide-react": "^0.468.0",
+    "otpauth": "^9.6.0",
+    "pdfkit": "^0.20.2",
+    "pg": "^8.23.1",
+    "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.91.0",
     "react-router-dom": "^7.18.5",
     "recharts": "^3.0.0",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.5",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "@playwright/test": "^1.55.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.9",
+    "@types/express": "^5.0.6",
+    "@types/pdfkit": "^0.17.7",
+    "@types/pg": "^8.23.1",
+    "@types/pngjs": "^6.0.5",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "@types/supertest": "^7.2.1",
     "@vitejs/plugin-react": "^4.5.0",
     "jsdom": "^31.0.0",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0",
     "prettier": "^3.9.10",
+    "supertest": "^7.3.2",
+    "tsx": "^4.23.15",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
     "vitest": "^5.1.0"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "^11.1.0"
+    }
   }
 }
