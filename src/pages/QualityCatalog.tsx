@@ -319,7 +319,7 @@ export default function QualityCatalog() {
         title="Indikator tidak ditemukan"
         description="Kode indikator tidak tersedia pada katalog referensi."
       >
-        <Link className="btn primary" to="/indikator-mutu">
+        <Link className="btn primary" to="/komite/indikator-mutu">
           Kembali ke katalog
         </Link>
       </Empty>
@@ -327,7 +327,7 @@ export default function QualityCatalog() {
   if (detail)
     return (
       <>
-        <Link to="/indikator-mutu" className="back-link">
+        <Link to="/komite/indikator-mutu" className="back-link">
           <ArrowLeft size={14} />
           Katalog indikator mutu
         </Link>
@@ -536,7 +536,7 @@ export default function QualityCatalog() {
                         </span>
                         <Link
                           className="table-title"
-                          to={`/indikator-mutu/${item.id}`}
+                          to={`/komite/indikator-mutu/${item.id}`}
                         >
                           {item.title}
                         </Link>
@@ -570,7 +570,7 @@ export default function QualityCatalog() {
                       <td>
                         <Link
                           className="icon-btn"
-                          to={`/indikator-mutu/${item.id}`}
+                          to={`/komite/indikator-mutu/${item.id}`}
                           aria-label={`Profil ${item.code ?? item.id}`}
                         >
                           <ArrowUpRight size={16} />

@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { useCommittee } from "./helpers";
+useCommittee();
 
 test("reference catalogue searches, filters and preserves conflicting source targets", async ({
   page,

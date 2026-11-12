@@ -1,4 +1,4 @@
-name: Validate frontend
+name: Validate reporting application
 on: [push, pull_request]
 jobs:
   check:
@@ -12,6 +12,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test
+      - run: npm run test:api
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
